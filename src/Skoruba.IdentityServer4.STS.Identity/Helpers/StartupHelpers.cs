@@ -33,11 +33,13 @@ namespace Skoruba.IdentityServer4.STS.Identity.Helpers
 {
     public static class StartupHelpers
     {
-        /// <summary>
-        /// Register services for MVC and localization including available languages
-        /// </summary>
-        /// <param name="services"></param>
-        public static void AddMvcWithLocalization<TUser, TKey>(this IServiceCollection services, IConfiguration configuration)
+		public static bool PostgresInUse { get; set; } = true;
+
+		/// <summary>
+		/// Register services for MVC and localization including available languages
+		/// </summary>
+		/// <param name="services"></param>
+		public static void AddMvcWithLocalization<TUser, TKey>(this IServiceCollection services, IConfiguration configuration)
             where TUser : IdentityUser<TKey>
             where TKey : IEquatable<TKey>
         {
@@ -310,7 +312,15 @@ namespace Skoruba.IdentityServer4.STS.Identity.Helpers
             where TContext : DbContext
         {
             var connectionString = configuration.GetConnectionString(ConfigurationConsts.IdentityDbConnectionStringKey);
-            services.AddDbContext<TContext>(options => options.UseSqlServer(connectionString));
+
+			if (PostgresInUse)
+			{
+				services.AddDbContext<TContext>(options => options.UseNpgsql(connectionString));
+			}
+			else
+			{
+				services.AddDbContext<TContext>(options => options.UseSqlServer(connectionString));
+			}
         }
 
         /// <summary>
@@ -323,8 +333,15 @@ namespace Skoruba.IdentityServer4.STS.Identity.Helpers
             where TContext : DbContext
         {
             var connectionString = configuration.GetConnectionString(ConfigurationConsts.AdminConnectionStringKey);
-            services.AddDbContext<TContext>(options => options.UseSqlServer(connectionString));
-        }
+			if (PostgresInUse)
+			{
+				services.AddDbContext<TContext>(options => options.UseNpgsql(connectionString));
+			}
+			else
+			{
+				services.AddDbContext<TContext>(options => options.UseSqlServer(connectionString));
+			}
+		}
 
         /// <summary>
         /// Register DbContexts and configure stores for IdentityServer4
@@ -383,11 +400,22 @@ namespace Skoruba.IdentityServer4.STS.Identity.Helpers
             // Config DB from existing connection
             builder.AddConfigurationStore<TConfigurationDbContext>(options =>
             {
-                options.ConfigureDbContext = b =>
-                    b.UseSqlServer(
-                        configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey),
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-            });
+				options.ConfigureDbContext = b =>
+				{
+					if (PostgresInUse)
+					{
+						b.UseNpgsql(
+								configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey),
+								sql => sql.MigrationsAssembly(migrationsAssembly));
+					}
+					else
+					{
+						b.UseSqlServer(
+								configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey),
+								sql => sql.MigrationsAssembly(migrationsAssembly));
+					}
+				};
+			});
 
             // Operational DB from existing connection
             builder.AddOperationalStore<TPersistedGrantDbContext>(options =>
@@ -397,9 +425,20 @@ namespace Skoruba.IdentityServer4.STS.Identity.Helpers
                 options.TokenCleanupInterval = 15;
 #endif
                 options.ConfigureDbContext = b =>
-                    b.UseSqlServer(
-                        configuration.GetConnectionString(ConfigurationConsts.PersistedGrantDbConnectionStringKey),
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
+				{
+					if (PostgresInUse)
+					{
+						b.UseNpgsql(
+								configuration.GetConnectionString(ConfigurationConsts.PersistedGrantDbConnectionStringKey),
+								sql => sql.MigrationsAssembly(migrationsAssembly));
+					}
+					else
+					{
+						b.UseSqlServer(
+								configuration.GetConnectionString(ConfigurationConsts.PersistedGrantDbConnectionStringKey),
+								sql => sql.MigrationsAssembly(migrationsAssembly));
+					}
+				};
             });
 
             return builder;

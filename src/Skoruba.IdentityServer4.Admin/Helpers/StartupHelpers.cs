@@ -50,7 +50,9 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
 {
     public static class StartupHelpers
     {
-        public static IServiceCollection AddAuditEventLogging<TAuditLoggingDbContext, TAuditLog>(this IServiceCollection services, IConfiguration configuration)
+		public static bool PostgresInUse { get; set; } = true;
+
+		public static IServiceCollection AddAuditEventLogging<TAuditLoggingDbContext, TAuditLog>(this IServiceCollection services, IConfiguration configuration)
             where TAuditLog : AuditLog, new()
             where TAuditLoggingDbContext : IAuditLoggingDbContext<TAuditLog>
         {
@@ -95,9 +97,20 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
 
             var storeOptions = new ConfigurationStoreOptions();
             services.AddSingleton(storeOptions);
+			if (PostgresInUse)
+			{
+				services.AddDbContext<TContext>(options => options.UseNpgsql(
+					configuration.GetConnectionString(ConfigurationConsts.AdminConnectionStringKey), 
+					optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly)));
 
-            services.AddDbContext<TContext>(options => options.UseSqlServer(configuration.GetConnectionString(ConfigurationConsts.AdminConnectionStringKey), optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly)));
-        }
+			}
+			else
+			{
+				services.AddDbContext<TContext>(options => options.UseSqlServer(
+					configuration.GetConnectionString(ConfigurationConsts.AdminConnectionStringKey), 
+					optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly)));
+			}     
+   }
 
         /// <summary>
         /// Register shared in Memory DbContext for IdentityServer ConfigurationStore and PersistedGrants, Identity and Logging
@@ -119,59 +132,109 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
             services.AddDbContext<TContext>(optionsBuilder => optionsBuilder.UseInMemoryDatabase(databaseName));
         }
 
-        /// <summary>
-        /// Register DbContexts for IdentityServer ConfigurationStore and PersistedGrants, Identity and Logging
-        /// Configure the connection strings in AppSettings.json
-        /// </summary>
-        /// <typeparam name="TConfigurationDbContext"></typeparam>
-        /// <typeparam name="TPersistedGrantDbContext"></typeparam>
-        /// <typeparam name="TLogDbContext"></typeparam>
-        /// <typeparam name="TIdentityDbContext"></typeparam>
-        /// <typeparam name="TAuditLoggingDbContext"></typeparam>
-        /// <param name="services"></param>
-        /// <param name="configuration"></param>
-        public static void RegisterDbContexts<TIdentityDbContext, TConfigurationDbContext, TPersistedGrantDbContext, TLogDbContext, TAuditLoggingDbContext>(this IServiceCollection services, IConfigurationRoot configuration)
-            where TIdentityDbContext : DbContext
-            where TPersistedGrantDbContext : DbContext, IAdminPersistedGrantDbContext
-            where TConfigurationDbContext : DbContext, IAdminConfigurationDbContext
-            where TLogDbContext : DbContext, IAdminLogDbContext
-            where TAuditLoggingDbContext : DbContext, IAuditLoggingDbContext<AuditLog>
-        {
-            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+		/// <summary>
+		/// Register DbContexts for IdentityServer ConfigurationStore and PersistedGrants, Identity and Logging
+		/// Configure the connection strings in AppSettings.json
+		/// </summary>
+		/// <typeparam name="TConfigurationDbContext"></typeparam>
+		/// <typeparam name="TPersistedGrantDbContext"></typeparam>
+		/// <typeparam name="TLogDbContext"></typeparam>
+		/// <typeparam name="TIdentityDbContext"></typeparam>
+		/// <typeparam name="TAuditLoggingDbContext"></typeparam>
+		/// <param name="services"></param>
+		/// <param name="configuration"></param>
+		public static void RegisterDbContexts<TIdentityDbContext, TConfigurationDbContext, TPersistedGrantDbContext, TLogDbContext, TAuditLoggingDbContext>(this IServiceCollection services, IConfigurationRoot configuration)
+			where TIdentityDbContext : DbContext
+			where TPersistedGrantDbContext : DbContext, IAdminPersistedGrantDbContext
+			where TConfigurationDbContext : DbContext, IAdminConfigurationDbContext
+			where TLogDbContext : DbContext, IAdminLogDbContext
+			where TAuditLoggingDbContext : DbContext, IAuditLoggingDbContext<AuditLog>
+		{
+			var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
-            // Config DB for identity
-            services.AddDbContext<TIdentityDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString(ConfigurationConsts.IdentityDbConnectionStringKey),
-                    sql => sql.MigrationsAssembly(migrationsAssembly)));
+			// Config DB for identity
+			services.AddDbContext<TIdentityDbContext>(options =>
+			{
+				if (PostgresInUse)
+				{
+					options.UseNpgsql(configuration.GetConnectionString(ConfigurationConsts.IdentityDbConnectionStringKey),
+						sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+				else
+				{
+					options.UseSqlServer(configuration.GetConnectionString(ConfigurationConsts.IdentityDbConnectionStringKey),
+							sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
 
-            // Config DB from existing connection
-            services.AddConfigurationDbContext<TConfigurationDbContext>(options =>
-            {
-                options.ConfigureDbContext = b =>
-                    b.UseSqlServer(configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey),
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-            });
+			// Config DB from existing connection
+			services.AddConfigurationDbContext<TConfigurationDbContext>(options =>
+			{
+				if (PostgresInUse)
+				{
+					options.ConfigureDbContext = b =>
+						b.UseNpgsql(configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey),
+							sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+				else
+				{
+					options.ConfigureDbContext = b =>
+						b.UseSqlServer(configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey),
+							sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
 
-            // Operational DB from existing connection
-            services.AddOperationalDbContext<TPersistedGrantDbContext>(options =>
-            {
-                options.ConfigureDbContext = b =>
-                    b.UseSqlServer(configuration.GetConnectionString(ConfigurationConsts.PersistedGrantDbConnectionStringKey),
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-            });
+			// Operational DB from existing connection
+			services.AddOperationalDbContext<TPersistedGrantDbContext>(options =>
+			{
+				if (PostgresInUse)
+				{
+					options.ConfigureDbContext = b =>
+						b.UseNpgsql(configuration.GetConnectionString(ConfigurationConsts.PersistedGrantDbConnectionStringKey),
+							sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+				else
+				{
+					options.ConfigureDbContext = b =>
+						b.UseSqlServer(configuration.GetConnectionString(ConfigurationConsts.PersistedGrantDbConnectionStringKey),
+							sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
 
-            // Log DB from existing connection
-            services.AddDbContext<TLogDbContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString(ConfigurationConsts.AdminLogDbConnectionStringKey),
-                    optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly)));
+			// Log DB from existing connection
+			services.AddDbContext<TLogDbContext>(options =>
+			{
+				if (PostgresInUse)
+				{
+					options.UseNpgsql(
+						configuration.GetConnectionString(ConfigurationConsts.AdminLogDbConnectionStringKey),
+						optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly));
+				}
+				else
+				{
+					options.UseSqlServer(
+						configuration.GetConnectionString(ConfigurationConsts.AdminLogDbConnectionStringKey),
+						optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
 
-            // Audit logging connection
-            services.AddDbContext<TAuditLoggingDbContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString(ConfigurationConsts.AdminAuditLogDbConnectionStringKey),
-                    optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly)));
-        }
+			// Audit logging connection
+			services.AddDbContext<TAuditLoggingDbContext>(options =>
+			{
+				if (PostgresInUse)
+				{
+					options.UseNpgsql(
+						configuration.GetConnectionString(ConfigurationConsts.AdminAuditLogDbConnectionStringKey),
+						optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly));
+				}
+				else
+				{
+					options.UseSqlServer(
+						configuration.GetConnectionString(ConfigurationConsts.AdminAuditLogDbConnectionStringKey),
+						optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
+		}
 
         /// <summary>
         /// Register in memory DbContexts for IdentityServer ConfigurationStore and PersistedGrants, Identity and Logging

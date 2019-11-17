@@ -62,8 +62,13 @@ Next we need to install PostgreSQL support for EntityFramework Core in Skoruba.I
 ```
 dotnet add src/Skoruba.IdentityServer4.Admin package Npgsql.EntityFrameworkCore.PostgreSQL
 dotnet add src/Skoruba.IdentityServer4.Admin package Npgsql.EntityFrameworkCore.PostgreSQL.Design
+dotnet add src/Skoruba.IdentityServer4.Admin package serilog.sinks.postgresql
+dotnet add src/Skoruba.IdentityServer4.Admin.Api package Npgsql.EntityFrameworkCore.PostgreSQL
+dotnet add src/Skoruba.IdentityServer4.Admin.Api package Npgsql.EntityFrameworkCore.PostgreSQL.Design
+dotnet add src/Skoruba.IdentityServer4.Admin.Api package serilog.sinks.postgresql
 dotnet add src/Skoruba.IdentityServer4.STS.Identity package Npgsql.EntityFrameworkCore.PostgreSQL
 dotnet add src/Skoruba.IdentityServer4.STS.Identity package Npgsql.EntityFrameworkCore.PostgreSQL.Design
+dotnet add src/Skoruba.IdentityServer4.STS.Identity serilog.sinks.postgresql
 ```
 
 ## Replace UseSqlServer with UseNpgsql
@@ -84,7 +89,7 @@ First run STS in `src/Skoruba.IdentityServer4.STS.Identity` launch:
 dotnet run
 ```
 
-Admin also needs to seed the database so seperate terminal in `src/Skoruba.IdentityServer4.Admin` we add additional seed parameter:
+Admin also needs to seed the database so separate terminal in `src/Skoruba.IdentityServer4.Admin` we add additional seed parameter:
 
 ```
 dotnet run /seed

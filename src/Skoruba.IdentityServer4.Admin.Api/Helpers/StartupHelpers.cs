@@ -28,139 +28,194 @@ using Skoruba.IdentityServer4.Admin.EntityFramework.Interfaces;
 
 namespace Skoruba.IdentityServer4.Admin.Api.Helpers
 {
-    public static class StartupHelpers
-    {
-        public static IServiceCollection AddAuditEventLogging<TAuditLoggingDbContext, TAuditLog>(
-            this IServiceCollection services, IConfiguration configuration)
-            where TAuditLog : AuditLog, new()
-            where TAuditLoggingDbContext : IAuditLoggingDbContext<TAuditLog>
-        {
-            var auditLoggingConfiguration = configuration.GetSection(nameof(AuditLoggingConfiguration))
-                .Get<AuditLoggingConfiguration>();
-            services.AddSingleton(auditLoggingConfiguration);
+	public static class StartupHelpers
+	{
+		public static bool PostgresInUse { get; set; } = true;
 
-            services.AddAuditLogging(options => { options.Source = auditLoggingConfiguration.Source; })
-                .AddEventData<ApiAuditSubject, ApiAuditAction>()
-                .AddAuditSinks<DatabaseAuditEventLoggerSink<TAuditLog>>();
+		public static IServiceCollection AddAuditEventLogging<TAuditLoggingDbContext, TAuditLog>(
+			this IServiceCollection services, IConfiguration configuration)
+			where TAuditLog : AuditLog, new()
+			where TAuditLoggingDbContext : IAuditLoggingDbContext<TAuditLog>
+		{
+			var auditLoggingConfiguration = configuration.GetSection(nameof(AuditLoggingConfiguration))
+				.Get<AuditLoggingConfiguration>();
+			services.AddSingleton(auditLoggingConfiguration);
 
-            services
-                .AddTransient<IAuditLoggingRepository<TAuditLog>,
-                    AuditLoggingRepository<TAuditLoggingDbContext, TAuditLog>>();
+			services.AddAuditLogging(options => { options.Source = auditLoggingConfiguration.Source; })
+				.AddEventData<ApiAuditSubject, ApiAuditAction>()
+				.AddAuditSinks<DatabaseAuditEventLoggerSink<TAuditLog>>();
 
-            return services;
-        }
+			services
+				.AddTransient<IAuditLoggingRepository<TAuditLog>,
+					AuditLoggingRepository<TAuditLoggingDbContext, TAuditLog>>();
 
-        /// <summary>
-        /// Register services for MVC
-        /// </summary>
-        /// <param name="services"></param>
-        public static void AddMvcServices<TUserDto, TUserDtoKey, TRoleDto, TRoleDtoKey, TUserKey, TRoleKey,
-            TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
-            TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
-            TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto>(
-            this IServiceCollection services)
-            where TUserDto : UserDto<TUserDtoKey>, new()
-            where TRoleDto : RoleDto<TRoleDtoKey>, new()
-            where TUser : IdentityUser<TKey>
-            where TRole : IdentityRole<TKey>
-            where TKey : IEquatable<TKey>
-            where TUserClaim : IdentityUserClaim<TKey>
-            where TUserRole : IdentityUserRole<TKey>
-            where TUserLogin : IdentityUserLogin<TKey>
-            where TRoleClaim : IdentityRoleClaim<TKey>
-            where TUserToken : IdentityUserToken<TKey>
-            where TRoleDtoKey : IEquatable<TRoleDtoKey>
-            where TUserDtoKey : IEquatable<TUserDtoKey>
-            where TUsersDto : UsersDto<TUserDto, TUserDtoKey>
-            where TRolesDto : RolesDto<TRoleDto, TRoleDtoKey>
-            where TUserRolesDto : UserRolesDto<TRoleDto, TUserDtoKey, TRoleDtoKey>
-            where TUserClaimsDto : UserClaimsDto<TUserDtoKey>
-            where TUserProviderDto : UserProviderDto<TUserDtoKey>
-            where TUserProvidersDto : UserProvidersDto<TUserDtoKey>
-            where TUserChangePasswordDto : UserChangePasswordDto<TUserDtoKey>
-            where TRoleClaimsDto : RoleClaimsDto<TRoleDtoKey>
-        {
-            services.TryAddTransient(typeof(IGenericControllerLocalizer<>), typeof(GenericControllerLocalizer<>));
+			return services;
+		}
 
-            services.AddControllersWithViews(o => { o.Conventions.Add(new GenericControllerRouteConvention()); })
-                .AddDataAnnotationsLocalization()
-                .ConfigureApplicationPartManager(m =>
-                {
-                    m.FeatureProviders.Add(
-                        new GenericTypeControllerFeatureProvider<TUserDto, TUserDtoKey, TRoleDto, TRoleDtoKey, TUserKey,
-                            TRoleKey, TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
-                            TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
-                            TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto>());
-                });
-        }
+		/// <summary>
+		/// Register services for MVC
+		/// </summary>
+		/// <param name="services"></param>
+		public static void AddMvcServices<TUserDto, TUserDtoKey, TRoleDto, TRoleDtoKey, TUserKey, TRoleKey,
+			TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
+			TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
+			TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto>(
+			this IServiceCollection services)
+			where TUserDto : UserDto<TUserDtoKey>, new()
+			where TRoleDto : RoleDto<TRoleDtoKey>, new()
+			where TUser : IdentityUser<TKey>
+			where TRole : IdentityRole<TKey>
+			where TKey : IEquatable<TKey>
+			where TUserClaim : IdentityUserClaim<TKey>
+			where TUserRole : IdentityUserRole<TKey>
+			where TUserLogin : IdentityUserLogin<TKey>
+			where TRoleClaim : IdentityRoleClaim<TKey>
+			where TUserToken : IdentityUserToken<TKey>
+			where TRoleDtoKey : IEquatable<TRoleDtoKey>
+			where TUserDtoKey : IEquatable<TUserDtoKey>
+			where TUsersDto : UsersDto<TUserDto, TUserDtoKey>
+			where TRolesDto : RolesDto<TRoleDto, TRoleDtoKey>
+			where TUserRolesDto : UserRolesDto<TRoleDto, TUserDtoKey, TRoleDtoKey>
+			where TUserClaimsDto : UserClaimsDto<TUserDtoKey>
+			where TUserProviderDto : UserProviderDto<TUserDtoKey>
+			where TUserProvidersDto : UserProvidersDto<TUserDtoKey>
+			where TUserChangePasswordDto : UserChangePasswordDto<TUserDtoKey>
+			where TRoleClaimsDto : RoleClaimsDto<TRoleDtoKey>
+		{
+			services.TryAddTransient(typeof(IGenericControllerLocalizer<>), typeof(GenericControllerLocalizer<>));
 
-        /// <summary>
-        /// Add configuration for logging
-        /// </summary>
-        /// <param name="app"></param>
-        /// <param name="configuration"></param>
-        public static void AddLogging(this IApplicationBuilder app, IConfiguration configuration)
-        {
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(configuration)
-                .CreateLogger();
-        }
+			services.AddControllersWithViews(o => { o.Conventions.Add(new GenericControllerRouteConvention()); })
+				.AddDataAnnotationsLocalization()
+				.ConfigureApplicationPartManager(m =>
+				{
+					m.FeatureProviders.Add(
+						new GenericTypeControllerFeatureProvider<TUserDto, TUserDtoKey, TRoleDto, TRoleDtoKey, TUserKey,
+							TRoleKey, TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
+							TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
+							TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto>());
+				});
+		}
 
-        /// <summary>
-        /// Register DbContexts for IdentityServer ConfigurationStore and PersistedGrants, Identity and Logging
-        /// Configure the connection strings in AppSettings.json
-        /// </summary>
-        /// <typeparam name="TConfigurationDbContext"></typeparam>
-        /// <typeparam name="TPersistedGrantDbContext"></typeparam>
-        /// <typeparam name="TLogDbContext"></typeparam>
-        /// <typeparam name="TIdentityDbContext"></typeparam>
-        /// <param name="services"></param>
-        /// <param name="configuration"></param>
-        public static void AddDbContexts<TIdentityDbContext, TConfigurationDbContext, TPersistedGrantDbContext,
-            TLogDbContext, TAuditLoggingDbContext>(this IServiceCollection services, IConfiguration configuration)
-            where TIdentityDbContext : DbContext
-            where TPersistedGrantDbContext : DbContext, IAdminPersistedGrantDbContext
-            where TConfigurationDbContext : DbContext, IAdminConfigurationDbContext
-            where TLogDbContext : DbContext, IAdminLogDbContext
-            where TAuditLoggingDbContext : DbContext, IAuditLoggingDbContext<AuditLog>
-        {
-            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+		/// <summary>
+		/// Add configuration for logging
+		/// </summary>
+		/// <param name="app"></param>
+		/// <param name="configuration"></param>
+		public static void AddLogging(this IApplicationBuilder app, IConfiguration configuration)
+		{
+			Log.Logger = new LoggerConfiguration()
+				.ReadFrom.Configuration(configuration)
+				.CreateLogger();
+		}
 
-            // Config DB for identity
-            services.AddDbContext<TIdentityDbContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString(ConfigurationConsts.IdentityDbConnectionStringKey),
-                    sql => sql.MigrationsAssembly(migrationsAssembly)));
+		/// <summary>
+		/// Register DbContexts for IdentityServer ConfigurationStore and PersistedGrants, Identity and Logging
+		/// Configure the connection strings in AppSettings.json
+		/// </summary>
+		/// <typeparam name="TConfigurationDbContext"></typeparam>
+		/// <typeparam name="TPersistedGrantDbContext"></typeparam>
+		/// <typeparam name="TLogDbContext"></typeparam>
+		/// <typeparam name="TIdentityDbContext"></typeparam>
+		/// <param name="services"></param>
+		/// <param name="configuration"></param>
+		public static void AddDbContexts<TIdentityDbContext, TConfigurationDbContext, TPersistedGrantDbContext,
+			TLogDbContext, TAuditLoggingDbContext>(this IServiceCollection services, IConfiguration configuration)
+			where TIdentityDbContext : DbContext
+			where TPersistedGrantDbContext : DbContext, IAdminPersistedGrantDbContext
+			where TConfigurationDbContext : DbContext, IAdminConfigurationDbContext
+			where TLogDbContext : DbContext, IAdminLogDbContext
+			where TAuditLoggingDbContext : DbContext, IAuditLoggingDbContext<AuditLog>
+		{
+			var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
-            // Config DB from existing connection
-            services.AddConfigurationDbContext<TConfigurationDbContext>(options =>
-            {
-                options.ConfigureDbContext = b =>
-                    b.UseSqlServer(
-                        configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey),
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-            });
+			// Config DB for identity
+			services.AddDbContext<TIdentityDbContext>(options =>
+			{
+				if (PostgresInUse)
+				{
+					options.UseNpgsql(
+						configuration.GetConnectionString(ConfigurationConsts.IdentityDbConnectionStringKey),
+						sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+				else
+				{
+					options.UseSqlServer(
+					configuration.GetConnectionString(ConfigurationConsts.IdentityDbConnectionStringKey),
+					sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
 
-            // Operational DB from existing connection
-            services.AddOperationalDbContext<TPersistedGrantDbContext>(options =>
-            {
-                options.ConfigureDbContext = b =>
-                    b.UseSqlServer(
-                        configuration.GetConnectionString(ConfigurationConsts.PersistedGrantDbConnectionStringKey),
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-            });
+			// Config DB from existing connection
+			services.AddConfigurationDbContext<TConfigurationDbContext>(options =>
+			{
+				if (PostgresInUse)
+				{
+					options.ConfigureDbContext = b =>
+						b.UseNpgsql(
+							configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey),
+							sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+				else
+				{
+					options.ConfigureDbContext = b =>
+					  b.UseSqlServer(
+						  configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey),
+						  sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
 
-            // Log DB from existing connection
-            services.AddDbContext<TLogDbContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString(ConfigurationConsts.AdminLogDbConnectionStringKey),
-                    optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly)));
+			// Operational DB from existing connection
+			services.AddOperationalDbContext<TPersistedGrantDbContext>(options =>
+			{
+				if (PostgresInUse)
+				{
+					options.ConfigureDbContext = b =>
+						b.UseNpgsql(
+							configuration.GetConnectionString(ConfigurationConsts.PersistedGrantDbConnectionStringKey),
+							sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+				else
+				{
+					options.ConfigureDbContext = b =>
+						b.UseSqlServer(
+							configuration.GetConnectionString(ConfigurationConsts.PersistedGrantDbConnectionStringKey),
+							sql => sql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
+
+			// Log DB from existing connection
+			services.AddDbContext<TLogDbContext>(options =>
+			{
+				if (PostgresInUse)
+				{
+					options.UseNpgsql(
+						configuration.GetConnectionString(ConfigurationConsts.AdminLogDbConnectionStringKey),
+						optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly));
+				} else
+				{
+					options.UseSqlServer(
+						configuration.GetConnectionString(ConfigurationConsts.AdminLogDbConnectionStringKey),
+						optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
 
             // Audit logging connection
             services.AddDbContext<TAuditLoggingDbContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString(ConfigurationConsts.AdminAuditLogDbConnectionStringKey),
-                    optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly)));
+			{
+				if (PostgresInUse)
+				{
+					options.UseNpgsql(
+						configuration.GetConnectionString(ConfigurationConsts.AdminAuditLogDbConnectionStringKey),
+						optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly));
+
+				}
+				else
+				{
+					options.UseSqlServer(
+						configuration.GetConnectionString(ConfigurationConsts.AdminAuditLogDbConnectionStringKey),
+						optionsSql => optionsSql.MigrationsAssembly(migrationsAssembly));
+				}
+			});
         }
 
         /// <summary>
