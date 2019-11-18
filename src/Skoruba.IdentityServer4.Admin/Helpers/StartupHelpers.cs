@@ -408,13 +408,13 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
         /// Add authorization policies
         /// </summary>
         /// <param name="services"></param>
-        public static void AddAuthorizationPolicies(this IServiceCollection services, IRootConfiguration rootConfiguration)
-        {
+        public static void AddAuthorizationPolicies(this IServiceCollection services, IAdminConfiguration adminConfiguration)//IRootConfiguration rootConfiguration)
+		{
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(AuthorizationConsts.AdministrationPolicy,
-                    policy => policy.RequireRole(rootConfiguration.AdminConfiguration.AdministrationRole));
-            });
+                    policy => policy.RequireRole(adminConfiguration.AdministrationRole));// rootConfiguration.AdminConfiguration.AdministrationRole));
+			});
         }
 
         /// <summary>
@@ -600,17 +600,20 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
         /// <param name="services"></param>
         /// <param name="configuration"></param>
         /// <returns></returns>
-        public static IServiceCollection ConfigureRootConfiguration(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection ConfigureRootConfiguration(this IServiceCollection services, IConfiguration configuration, out AdminConfiguration adminConfiguration)
         {
             services.AddOptions();
 
-            services.Configure<AdminConfiguration>(configuration.GetSection(ConfigurationConsts.AdminConfigurationKey));
+			var admConfiguration = new Configuration.AdminConfiguration();
+			configuration.GetSection(ConfigurationConsts.AdminConfigurationKey).Bind(admConfiguration);
+			services.AddOptions<IAdminConfiguration>().Configure(o => o = admConfiguration);
             services.Configure<IdentityDataConfiguration>(configuration.GetSection(ConfigurationConsts.IdentityDataConfigurationKey));
             services.Configure<IdentityServerDataConfiguration>(configuration.GetSection(ConfigurationConsts.IdentityServerDataConfigurationKey));
 
             services.TryAddSingleton<IRootConfiguration, RootConfiguration>();
 
-            return services;
+			adminConfiguration = admConfiguration;
+			return services;
         }
 
         private static Task OnMessageReceived(MessageReceivedContext context, IAdminConfiguration adminConfiguration)
