@@ -33,7 +33,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Helpers
 {
     public static class StartupHelpers
     {
-		public static bool PostgresInUse { get; set; } = true;
+		public static bool PostgresInUse { get; set; } = false;
 
 		/// <summary>
 		/// Register services for MVC and localization including available languages

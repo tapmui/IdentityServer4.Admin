@@ -30,7 +30,7 @@ namespace Skoruba.IdentityServer4.Admin.Api.Helpers
 {
 	public static class StartupHelpers
 	{
-		public static bool PostgresInUse { get; set; } = true;
+		public static bool PostgresInUse { get; set; } = false;
 
 		public static IServiceCollection AddAuditEventLogging<TAuditLoggingDbContext, TAuditLog>(
 			this IServiceCollection services, IConfiguration configuration)

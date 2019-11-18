@@ -38,9 +38,10 @@ namespace Skoruba.IdentityServer4.STS.Identity
         public void ConfigureServices(IServiceCollection services)
         {
             services.ConfigureRootConfiguration(Configuration);
+			StartupHelpers.PostgresInUse = Configuration.GetValue<bool>(nameof(StartupHelpers.PostgresInUse));
 
-            // Add DbContext for Asp.Net Core Identity
-            services.AddIdentityDbContext<AdminIdentityDbContext>(Configuration, Environment);
+			// Add DbContext for Asp.Net Core Identity
+			services.AddIdentityDbContext<AdminIdentityDbContext>(Configuration, Environment);
 
             // Add email senders which is currently setup for SendGrid and SMTP
             services.AddEmailSenders(Configuration);

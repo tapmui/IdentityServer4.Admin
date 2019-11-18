@@ -47,6 +47,7 @@ namespace Skoruba.IdentityServer4.Admin
 			// Get Configuration
 			AdminConfiguration adminConfiguration;
 			services.ConfigureRootConfiguration(Configuration, out adminConfiguration);
+			StartupHelpers.PostgresInUse = Configuration.GetValue<bool>(nameof(StartupHelpers.PostgresInUse));
 
 			// Add DbContexts for Asp.Net Core Identity, Logging and IdentityServer - Configuration store and Operational store
 			services.AddDbContexts<AdminIdentityDbContext, IdentityServerConfigurationDbContext, IdentityServerPersistedGrantDbContext, AdminLogDbContext, AdminAuditLogDbContext>(HostingEnvironment, Configuration);
