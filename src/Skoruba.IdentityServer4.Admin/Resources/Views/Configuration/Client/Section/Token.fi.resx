@@ -121,7 +121,7 @@
     <value>Hallinnoi asiakasvaatimuksia</value>
   </data>
   <data name="PanelTitle" xml:space="preserve">
-    <value>symbolinen</value>
+    <value>Token</value>
   </data>
   <data name="PickerItemAlreadySelectedTitle" xml:space="preserve">
     <value>Kohde on jo valittu</value>

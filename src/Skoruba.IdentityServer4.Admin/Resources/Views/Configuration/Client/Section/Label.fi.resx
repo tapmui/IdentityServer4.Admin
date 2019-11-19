@@ -283,13 +283,13 @@ Yhden kerran päivitysmerkin kahva päivitetään, kun päivitetään merkkejä<
     <value>Jos määritetään, sitä käytetään oletus CORS-käytäntöpalvelun toteutuksissa (muistissa ja EF) rakentamaan CORS-käytäntö JavaScript-asiakkaille.</value>
   </data>
   <data name="AllowedCorsOrigins_Label" xml:space="preserve">
-    <value>Sallittujen korsien alkuperä</value>
+    <value>Sallitut cors-osoitteet</value>
   </data>
   <data name="AllowedGrantTypes_Info" xml:space="preserve">
     <value>Määrittää avustyypit, joita Sovelluksen sallitaan käyttää. Käytä GrantTypes-luokkaa yleisiin yhdistelmiin. Oletusapurahojen luettelo: implisiittinen käyttöoikeus - (implisiittinen), asiakastodistusten myöntäminen - (asiakas_koodit), käyttöoikeuskoodin myöntäminen - (valtuuskoodi), yhdistelmäapu - (hybridi), resurssin omistajan salasanan käyttöoikeudet - (salasana)</value>
   </data>
   <data name="AllowedGrantTypes_Label" xml:space="preserve">
-    <value>Sallitut avustuslajit</value>
+    <value>Sallitut yhteydenottotavat</value>
   </data>
   <data name="AllowedScopes_Info" xml:space="preserve">
     <value>Oletuksena asiakkaalla ei ole pääsyä resursseihin - määritä sallitut resurssit lisäämällä vastaavat laajuusnimet</value>
@@ -301,7 +301,7 @@ Yhden kerran päivitysmerkin kahva päivitetään, kun päivitetään merkkejä<
     <value>Sallii asiakasasetuksia koskevat vaatimukset (sisällytetään käyttöoikeustunnukseen).</value>
   </data>
   <data name="Claims_Label" xml:space="preserve">
-    <value>väittää</value>
+    <value>tunnisteet</value>
   </data>
   <data name="ClientSecrets_Info" xml:space="preserve">
     <value>Luettelo asiakassalaisuuksista - käyttöoikeustiedot avataksesi token-päätepiste.</value>
@@ -325,7 +325,7 @@ Yhden kerran päivitysmerkin kahva päivitetään, kun päivitetään merkkejä<
     <value>Määrittää sallitut URI: t, joihin palautetaan tokenit tai valtuuskoodit</value>
   </data>
   <data name="RedirectUris_Label" xml:space="preserve">
-    <value>Ohjaa Uris</value>
+    <value>Sallitut uudelleenohjausosoitteet</value>
   </data>
   <data name="Type_Info" xml:space="preserve">
     <value />
@@ -367,7 +367,7 @@ Yhden kerran päivitysmerkin kahva päivitetään, kun päivitetään merkkejä<
     <value>Määrittää, lähetetäänkö käyttäjän istunnon tunnus pyynnössä BackChannelLogoutUri -sivulle. Oletusarvo totta.</value>
   </data>
   <data name="BackChannelLogoutSessionRequired_Label" xml:space="preserve">
-    <value>Takaisin kanavan uloskirjautumisistunto vaaditaan</value>
+    <value>Backend-kanavan uloskirjautumisistunto vaaditaan</value>
   </data>
   <data name="BackChannelLogoutUri_Info" xml:space="preserve">
     <value>Määrittää uloskirjautumisen URI: n asiakkaassa HTTP-pohjaisen takakanavan uloskirjautumisen yhteydessä. Katso lisätietoja OIDC-takakanavan teknisistä tiedoista.</value>
@@ -391,7 +391,7 @@ Yhden kerran päivitysmerkin kahva päivitetään, kun päivitetään merkkejä<
     <value>Määrittää, onko käyttäjän istunnon tunnus lähetettävä FrontChannelLogoutUri -sovellukseen. Oletusarvo totta.</value>
   </data>
   <data name="FrontChannelLogoutSessionRequired_Label" xml:space="preserve">
-    <value>Etuskanavan uloskirjautumisistunto vaaditaan</value>
+    <value>Front-kanavan uloskirjautumisistunto vaaditaan</value>
   </data>
   <data name="FrontChannelLogoutUri_Info" xml:space="preserve">
     <value>Määrittää uloskirjautumisen URI asiakasohjelmassa HTTP-pohjaisen etukanavan uloskirjautumisen yhteydessä. Katso lisätietoja OIDC Front Channel -spesifikaatiosta.</value>
@@ -403,7 +403,7 @@ Yhden kerran päivitysmerkin kahva päivitetään, kun päivitetään merkkejä<
     <value>Suola-arvo, jota käytetään parinpohjaisessa subjektien luonnissa tämän Sovelluksen käyttäjille.</value>
   </data>
   <data name="PairWiseSubjectSalt_Label" xml:space="preserve">
-    <value>Yhdistä viisas aiheinen suola</value>
+    <value>Parien välilnen suolatunniste</value>
   </data>
   <data name="Properties_Info" xml:space="preserve">
     <value>Sanakirja pitää tarvittavat mukautetut asiakaskohtaiset arvot.</value>
